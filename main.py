@@ -90,7 +90,7 @@ class ArbitrageSystem:
         # Run data collection and ML training concurrently
         await asyncio.gather(
             self.run_data_collection(),
-            self.train_ml_model(),
+            # self.train_ml_model(),
             return_exceptions=True
         )
 

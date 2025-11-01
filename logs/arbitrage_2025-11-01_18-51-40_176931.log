@@ -1,0 +1,8 @@
+2025-11-01 18:51:40.178 | INFO     | __main__:run:75 - ============================================================
+2025-11-01 18:51:40.179 | INFO     | __main__:run:76 - 🚀 CRYPTO ARBITRAGE DETECTION SYSTEM
+2025-11-01 18:51:40.179 | INFO     | __main__:run:77 - ============================================================
+2025-11-01 18:51:40.179 | INFO     | __main__:run:78 - Monitoring exchanges: Coinbase, Binance, Bitstamp
+2025-11-01 18:51:40.179 | INFO     | __main__:run:79 - Trading pairs: BTC-USD, ETH-USD, SOL-USD
+2025-11-01 18:51:40.179 | INFO     | __main__:run:80 - Dashboard: http://localhost:8050
+2025-11-01 18:51:40.181 | INFO     | __main__:run:81 - ============================================================
+2025-11-01 18:51:40.189 | INFO     | dashboard:run:458 - Starting dashboard on http://0.0.0.0:8050
