@@ -102,7 +102,26 @@ class ArbitrageDashboard:
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
-                        dbc.CardHeader("📈 Live Price Feeds"),
+                        dbc.CardHeader([
+                            dbc.Row([
+                                dbc.Col([
+                                    html.Span("📈 Live Price Feeds", className="text-black")
+                                ], width=6),
+                                dbc.Col([
+                                    dcc.Dropdown(
+                                        id='symbol-dropdown',
+                                        options=[
+                                            {'label': '₿ Bitcoin (BTC)', 'value': 'BTC-USD'},
+                                            {'label': 'Ξ Ethereum (ETH)', 'value': 'ETH-USD'},
+                                            {'label': '◎ Solana (SOL)', 'value': 'SOL-USD'}
+                                        ],
+                                        value='BTC-USD',
+                                        clearable=False,
+                                        style={'color': '#000'}
+                                    )
+                                ], width=6)
+                            ], align="center")
+                        ], className="text-black"),
                         dbc.CardBody([
                             dcc.Graph(id="price-chart", config={'displayModeBar': False})
                         ])
@@ -218,14 +237,16 @@ class ArbitrageDashboard:
 
         @self.app.callback(
             Output("price-chart", "figure"),
-            Input("interval-component", "n_intervals")
+            [Input("interval-component", "n_intervals"),
+             Input("symbol-dropdown", "value")]
         )
-        def update_price_chart(n):
+        def update_price_chart(n, selected_symbol):
             fig = go.Figure()
 
             symbols = ['BTC-USD', 'ETH-USD', 'SOL-USD']
             colors = {'Coinbase': '#0052FF', 'Binance': '#F3BA2F', 'Bitstamp': '#00D43A'}
 
+            # Still collect data for all symbols (for history)
             for symbol in symbols:
                 # Get latest prices for this symbol
                 prices = self.detector.get_latest_prices(symbol)
@@ -241,28 +262,39 @@ class ArbitrageDashboard:
                         'price': price_data.price
                     })
 
-            # Plot each symbol
-            for symbol in symbols:
-                if symbol in self.price_history and len(self.price_history[symbol]) > 0:
-                    df = pd.DataFrame(list(self.price_history[symbol]))
+            # Plot only the selected symbol
+            if selected_symbol in self.price_history and len(self.price_history[selected_symbol]) > 0:
+                df = pd.DataFrame(list(self.price_history[selected_symbol]))
 
-                    for exchange in df['exchange'].unique():
-                        ex_df = df[df['exchange'] == exchange]
+                for exchange in df['exchange'].unique():
+                    ex_df = df[df['exchange'] == exchange]
 
-                        fig.add_trace(go.Scatter(
-                            x=ex_df['timestamp'],
-                            y=ex_df['price'],
-                            mode='lines',
-                            name=f"{symbol} - {exchange}",
-                            line=dict(color=colors.get(exchange, '#FFFFFF'), width=2),
-                            hovertemplate=f"<b>{exchange}</b><br>" +
-                                        "Price: $%{y:.2f}<br>" +
-                                        "<extra></extra>"
-                        ))
+                    fig.add_trace(go.Scatter(
+                        x=ex_df['timestamp'],
+                        y=ex_df['price'],
+                        mode='lines',
+                        name=f"{exchange}",
+                        line=dict(color=colors.get(exchange, '#FFFFFF'), width=2),
+                        hovertemplate=f"<b>{exchange}</b><br>" +
+                                    "Price: $%{y:.2f}<br>" +
+                                    "<extra></extra>"
+                    ))
+
+            # Get symbol name for title
+            symbol_names = {
+                'BTC-USD': 'Bitcoin',
+                'ETH-USD': 'Ethereum',
+                'SOL-USD': 'Solana'
+            }
 
             fig.update_layout(
                 template="plotly_dark",
                 height=400,
+                title=dict(
+                    text=f"{symbol_names.get(selected_symbol, selected_symbol)} Price Comparison",
+                    x=0.5,
+                    xanchor='center'
+                ),
                 xaxis_title="Time",
                 yaxis_title="Price (USD)",
                 hovermode='x unified',
